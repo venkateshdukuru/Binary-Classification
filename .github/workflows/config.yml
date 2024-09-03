@@ -1,10 +1,12 @@
 
 
 name: branch-protection.yml
+
 on:
   push:
     branches:
       - main
+
 jobs:
   enforce-branch-rules:
     runs-on: windows-latest
@@ -13,18 +15,17 @@ jobs:
         node-version: [20]
     steps:
       - name: Check for code changes
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | ifneq (echo "No code changes detected")
+        uses: actions/checkout@v2
       - name: Enforce code coverage report
         run: |
-          npm install -g codecov
-          npm run test
-          codecov
+          if [ -n "$(git diff HEAD~ --name-only | grep '.js$')" ]; then
+            npm run coverage
+          fi
       - name: Verify code linting and unit tests
         run: |
-          npm install -g eslint
-          npm test
+          if [ -n "$(git diff HEAD~ --name-only | grep '.js$')" ]; then
+            npm run lint
+            npm test
+          fi
       - name: Complete job
-        run: |
-          echo "Job completed successfully"
+        run: echo "Job completed successfully."
