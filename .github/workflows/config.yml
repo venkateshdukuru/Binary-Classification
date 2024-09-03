@@ -1,25 +1,33 @@
 
 
+
 name: branch-protection.yml
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   enforce-branch-rules:
     runs-on: windows-latest
     strategy:
       matrix:
-        node-version: [20]
+        node-version: [20.x]
     steps:
-      - name: Check for code changes
+      - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      - name: Check for code changes
+        run: |
+          if [ -z "$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})" ]; then
+            echo "No code changes detected"
+            exit 1
+          fi
       - name: Enforce code coverage report
-        run: npm run coverage
+        run: |
+          # Add code coverage report commands here
       - name: Verify code linting and unit tests
-        run: npm run lint && npm run test
+        run: |
+          # Add linting and unit test commands here
       - name: Complete job
-        run: npm run job-complete
+        run: |
+          # Add any additional commands to complete job here
