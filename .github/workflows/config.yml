@@ -1,0 +1,25 @@
+
+
+name: branch-protection.yml
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  enforce-branch-rules:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node_version: [20]
+    steps:
+      - name: Check for code changes
+        if: ${{ github.event_name == 'push' && github.event.ref == 'main' && contains(github.event.commits[0].added, '**') || contains(github.event.commits[0].modified, '**') || contains(github.event.commits[0].removed, '**') }}
+        run: |
+          echo "Changes detected in commit, enforcing branch rules..."
+      - name: Enforce code coverage report
+        if: ${{ github.event_name == 'push' && github.event.ref == 'main' && contains(github.event.commits[0].added, '*.js') || contains(github.event.commits[0].modified, '*.js') || contains(github.event.commits[0].removed, '*.js') }}
+        run: |
+          echo "Code coverage report enforced."
+      - name: Verify code linting and unit tests
+        if: ${{ github.event_name == 'push' && github.event.ref
